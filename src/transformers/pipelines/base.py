@@ -1243,11 +1243,89 @@ class Pipeline(_ScikitCompat, PushToHubMixin):
         for input_ in inputs:
             yield self.run_single(input_, preprocess_params, forward_params, postprocess_params)
 
+    def push_to_hub(
+        self,
+        repo_id: str,
+        use_temp_dir: Optional[bool] = None,
+        commit_message: Optional[str] = None,
+        private: Optional[bool] = None,
+        token: Optional[Union[bool, str]] = None,
+        max_shard_size: Optional[Union[int, str]] = "5GB",
+        create_pr: bool = False,
+        safe_serialization: bool = True,
+        revision: str = None,
+        commit_description: str = None,
+        tags: Optional[List[str]] = None,
+        **deprecated_kwargs,
+    ):
+        """
+        Upload the {object_files} to the 🤗 Model Hub.
+
+        Parameters:
+            repo_id (`str`):
+                The name of the repository you want to push your {object} to. It should contain your organization name
+                when pushing to a given organization.
+            use_temp_dir (`bool`, *optional*):
+                Whether or not to use a temporary directory to store the files saved before they are pushed to the Hub.
+                Will default to `True` if there is no directory named like `repo_id`, `False` otherwise.
+            commit_message (`str`, *optional*):
+                Message to commit while pushing. Will default to `"Upload {object}"`.
+            private (`bool`, *optional*):
+                Whether or not the repository created should be private.
+            token (`bool` or `str`, *optional*):
+                The token to use as HTTP bearer authorization for remote files. If `True`, will use the token generated
+                when running `huggingface-cli login` (stored in `~/.huggingface`). Will default to `True` if `repo_url`
+                is not specified.
+            max_shard_size (`int` or `str`, *optional*, defaults to `"5GB"`):
+                Only applicable for models. The maximum size for a checkpoint before being sharded. Checkpoints shard
+                will then be each of size lower than this size. If expressed as a string, needs to be digits followed
+                by a unit (like `"5MB"`). We default it to `"5GB"` so that users can easily load models on free-tier
+                Google Colab instances without any CPU OOM issues.
+            create_pr (`bool`, *optional*, defaults to `False`):
+                Whether or not to create a PR with the uploaded files or directly commit.
+            safe_serialization (`bool`, *optional*, defaults to `True`):
+                Whether or not to convert the model weights in safetensors format for safer serialization.
+            revision (`str`, *optional*):
+                Branch to push the uploaded files to.
+            commit_description (`str`, *optional*):
+                The description of the commit that will be created
+            tags (`List[str]`, *optional*):
+                List of tags to push on the Hub.
+
+        Examples:
+
+        ```python
+        from transformers import {object_class}
+
+        {object} = {object_class}("fill-mask", model="bert-base-uncased")
+
+        # Push the {object} to your namespace with the name "my-finetuned-bert".
+        {object}.push_to_hub("my-finetuned-bert")
+
+        # Push the {object} to an organization with the name "my-finetuned-bert".
+        {object}.push_to_hub("huggingface/my-finetuned-bert")
+        ```
+        """
+        super().push_to_hub(
+            repo_id,
+            use_temp_dir,
+            commit_message,
+            private,
+            token,
+            max_shard_size,
+            create_pr,
+            safe_serialization,
+            revision,
+            commit_description,
+            tags,
+            **deprecated_kwargs,
+        )
+
 
 Pipeline.push_to_hub = copy_func(Pipeline.push_to_hub)
 if Pipeline.push_to_hub.__doc__ is not None:
     Pipeline.push_to_hub.__doc__ = Pipeline.push_to_hub.__doc__.format(
-        object="pipe", object_class="pipeline", object_files="model file"
+        object="pipe", object_class="pipeline", object_files="pipeline file"
     )
 
 
