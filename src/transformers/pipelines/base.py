@@ -934,8 +934,11 @@ class Pipeline(_ScikitCompat, PushToHubMixin):
 
                 custom_pipelines[task] = info
             self.model.config.custom_pipelines = custom_pipelines
-            # Save the pipeline custom code
-            custom_object_save(self, save_directory)
+            # tag auto_map if the model is in a different repo
+            # self.model.config._name_or_path is always not none when creating or calling the custom pipeline
+            # TODO: if "/" not in repo_id check username and add the full repo_id instead
+            if getattr(kwargs, "repo_id", None) != getattr(self.model.config, "_name_or_path"):
+                custom_object_save(self, save_directory)
 
         self.model.save_pretrained(save_directory, safe_serialization=safe_serialization)
 
